@@ -35,11 +35,9 @@ class UserResource extends Resource
                 Forms\Components\DateTimePicker::make('email_verified_at'),
                 Forms\Components\TextInput::make('password')
                     ->password()
-                    ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('roles')
                     ->relationship('roles', 'name')
-                    ->multiple()
                     ->preload()
                     ->searchable(),
             ]); 
@@ -56,7 +54,8 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('role.name')
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Peran')
                     ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

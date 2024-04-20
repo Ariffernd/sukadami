@@ -14,4 +14,8 @@ class Periode extends Model
         'gel',
         'status',
     ];
+
+    public function formulir(){
+        return $this->hasMany(Formulir::class);
+    }
 }
