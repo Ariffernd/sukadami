@@ -5,12 +5,10 @@ namespace App\Models;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Formulir extends Model implements HasMedia
+class Formulir extends Model
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory;
 
     protected $fillable = [
         'user_id',
@@ -29,10 +27,6 @@ class Formulir extends Model implements HasMedia
         'anak_sdr', //saudara anak
         'status_ank', //yatim piatu etc.
         'tmpt_ank', //tinggal bersama orangtua/ wali
-        'brt_bdn',
-        'sat_brt',
-        'tngi_bdn',
-        'sat_tngi',
 
         'alamat',
         'rt',
