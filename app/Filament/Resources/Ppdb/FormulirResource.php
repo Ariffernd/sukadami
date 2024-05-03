@@ -23,9 +23,11 @@ use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\Ppdb\FormulirResource\Pages;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Infolists\Components\Section as ComponentsSection;
 use Marvinosswald\FilamentInputSelectAffix\TextInputSelectAffix;
 use App\Filament\Resources\Ppdb\FormulirResource\RelationManagers;
+
 
 class FormulirResource extends Resource
 {
@@ -34,7 +36,6 @@ class FormulirResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';
     protected static ?string $navigationGroup = 'PPDB';
     protected static ?string $navigationLabel = 'Formulir PPDB';
-    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -55,6 +56,7 @@ class FormulirResource extends Resource
                 Section::make('Data Siswa')->schema([
                     TextInput::make('nama')
                         ->required()
+                        ->autofocus()
                         ->label('Nama Lengkap'),
                     TextInput::make('nama_p')
                         ->label('Nama Panggilan'),
@@ -98,14 +100,7 @@ class FormulirResource extends Resource
                             'Budha' => 'Budha',
                             'Katolik' => 'Katolik',
                         ]),
-                    TextInput::make('anak_ke')
-                        ->label('Anak ke-')
-                        ->required()
-                        ->numeric(),
-                    TextInput::make('anak_sdr')
-                        ->label('Jumlah Saudara')
-                        ->required()
-                        ->numeric(),
+
                     Select::make('status_ank')
                         ->label('Status Anak')
                         ->required()
@@ -121,7 +116,35 @@ class FormulirResource extends Resource
                         ->options([
                             'Orang Tua' => 'Orang Tua',
                             'Wali' => 'Wali',
-                        ])
+                        ]),
+                    Section::make('Data Periodik Siswa')->schema([
+                        TextInput::make('anak_ke')
+                            ->label('Anak ke-')
+                            ->required()
+                            ->numeric(),
+                        TextInput::make('anak_sdr')
+                            ->label('Jumlah Saudara')
+                            ->required()
+                            ->numeric(),
+                        TextInputSelectAffix::make('brt_bdn')
+                            ->label('Berat Badan')
+                            ->numeric()
+                            ->select(
+                                fn () => Forms\Components\Select::make('sat_brt')
+                                    ->options([
+                                        'Kg' => 'Kg',
+                                    ])
+                            ),
+                        TextInputSelectAffix::make('tngi_bdn')
+                            ->label('Tinggi Badan')
+                            ->numeric()
+                            ->select(
+                                fn () => Forms\Components\Select::make('sat_tngi')
+                                    ->options([
+                                        'Cm' => 'Cm',
+                                    ])
+                            ),
+                    ])->columns(2)
                 ])->columns(3),
 
                 // ALAMAT
@@ -160,15 +183,17 @@ class FormulirResource extends Resource
                         ->searchable()
                         ->options(fn ($get) => Village::where('district_id', $get('district_id'))->pluck('name', 'id')),
                     TextInputSelectAffix::make('jrk_rmh')
+                        ->label('Jarak Dari Rumah Ke Sekolah')
                         ->numeric()
                         ->select(
                             fn () => Forms\Components\Select::make('sat_jrk')
                                 ->options([
                                     'M' => 'Meter',
-                                    'KM' => 'Kilo Meter',
+                                    'KM' => 'Kilometer',
                                 ])
                         ),
                     TextInputSelectAffix::make('wkt_tmph')
+                        ->label('Waktu Tempuh Dari Rumah Ke Sekolah')
                         ->numeric()
                         ->select(
                             fn () => Forms\Components\Select::make('sat_tmph')
@@ -186,6 +211,7 @@ class FormulirResource extends Resource
                         ->label('Nama Lengkap Ayah')
                         ->required(),
                     TextInput::make('nik_ayh')
+                        ->numeric()
                         ->label('NIK Ayah')
                         ->required(),
                     DatePicker::make('thn_lh_ayh')
@@ -215,10 +241,10 @@ class FormulirResource extends Resource
                         ->required(),
                     TextInput::make('no_telp_ayh')
                         ->label('Nomor Telp Ayah')
-                        ->required(),
-
-
-
+                        ->required()
+                        ->numeric()
+                        ->tel()
+                        ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
                 ])->columns(2),
 
                 //DATA ORANG TUA Ibu
@@ -256,7 +282,9 @@ class FormulirResource extends Resource
                         ->required(),
                     TextInput::make('no_telp_ibu')
                         ->label('Nomor Telp Ibu')
-                        ->required(),
+                        ->required()
+                        ->tel()
+                        ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
                 ])->columns(2),
 
                 //DATA ORANG TUA Wali
@@ -287,8 +315,28 @@ class FormulirResource extends Resource
                     TextInput::make('sal_wali')
                         ->label('Pendapatan Per-bulan'),
                     TextInput::make('no_telp_wali')
-                        ->label('Nomor Telp Wali'),
+                        ->label('Nomor Telp Wali')
+                        ->tel()
+                        ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
                 ])->columns(2),
+
+                Section::make('Upload File')->schema([
+                    SpatieMediaLibraryFileUpload::make('kk')
+                        ->collection('kks')
+                        ->required()
+                        ->openable()
+                        ->downloadable(),
+                    SpatieMediaLibraryFileUpload::make('akta')
+                        ->collection('aktas')
+                        ->required()
+                        ->openable()
+                        ->downloadable(),
+                    SpatieMediaLibraryFileUpload::make('ijazah')
+                        ->collection('ijazahs')
+                        ->required()
+                        ->openable()
+                        ->downloadable(),
+                ])
             ]);
     }
 
@@ -297,10 +345,11 @@ class FormulirResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('user.name')
+                    ->searchable()
                     ->label('Akun Pendaftar')
                     ->badge(),
-
                 TextColumn::make('periode.ta')
+                    ->searchable()
                     ->label('Tahun Ajaran')
                     ->badge(),
                 TextColumn::make('periode.gel')
@@ -312,17 +361,20 @@ class FormulirResource extends Resource
                     ->label('Tanggal Lahir'),
                 TextColumn::make('jk')
                     ->label('Jenis Kelamin'),
-                
+
             ])
             ->filters([
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\CreateAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ExportAction::make(),
                 ]),
             ]);
     }
@@ -339,7 +391,7 @@ class FormulirResource extends Resource
         return [
             'index' => Pages\ListFormulirs::route('/'),
             'create' => Pages\CreateFormulir::route('/create'),
-            'edit' => Pages\EditFormulir::route('/{record}/edit'),
+            // 'edit' => Pages\EditFormulir::route('/{record}/edit'),
         ];
     }
 }
