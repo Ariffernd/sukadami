@@ -6,6 +6,6 @@
     <title>Document</title>
 </head>
 <body>
-   <a href="http://127.0.0.1:8000/panel">ADMIN</a>
+   <a href="{{ url('/panel') }}">ADMIN</a>
 </body>
 </html>
