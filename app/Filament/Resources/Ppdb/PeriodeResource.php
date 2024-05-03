@@ -50,7 +50,8 @@ class PeriodeResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('ta')
-                    ->label('Tahun Ajaran'),
+                    ->label('Tahun Ajaran')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('gel')
                     ->label('Periode'),
                 Tables\Columns\IconColumn::make('status')
