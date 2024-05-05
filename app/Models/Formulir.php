@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Formulir extends Model implements HasMedia
+class Formulir extends Model
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory;
 
     protected $fillable = [
         'user_id',
@@ -33,6 +33,8 @@ class Formulir extends Model implements HasMedia
         'sat_brt',
         'tngi_bdn',
         'sat_tngi',
+        'lkrkp',
+        'sat_lkrkp',
 
         'alamat',
         'rt',
@@ -70,6 +72,10 @@ class Formulir extends Model implements HasMedia
         'sal_wali', //pendapatan wali
         'no_telp_wali',
 
+        'ijazah',
+        'kk',
+        'akte',
+
     ];
 
 
@@ -89,12 +95,13 @@ class Formulir extends Model implements HasMedia
     {
         return $this->belongsTo(User::class);
     }
-    public function periode(){
+    public function periode()
+    {
         return $this->belongsTo(Periode::class);
     }
 
 
-    // PANGGUL DATA WILAYAH
+    // RELASI DATA WILAYAH
     public function province()
     {
         return $this->belongsTo(Province::class);

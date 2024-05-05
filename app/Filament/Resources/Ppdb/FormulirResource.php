@@ -6,11 +6,13 @@ use Filament\Forms;
 use Filament\Tables;
 use App\Models\Periode;
 use App\Models\Regency;
+use App\Models\Seleksi;
 use App\Models\Village;
 use App\Models\District;
 use App\Models\Formulir;
 use App\Models\Province;
 use Filament\Forms\Form;
+use App\Models\SeleksiPd;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
@@ -20,10 +22,12 @@ use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\Ppdb\FormulirResource\Pages;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Filament\Infolists\Components\Section as ComponentsSection;
 use Marvinosswald\FilamentInputSelectAffix\TextInputSelectAffix;
 use App\Filament\Resources\Ppdb\FormulirResource\RelationManagers;
@@ -140,6 +144,15 @@ class FormulirResource extends Resource
                             ->numeric()
                             ->select(
                                 fn () => Forms\Components\Select::make('sat_tngi')
+                                    ->options([
+                                        'Cm' => 'Cm',
+                                    ])
+                            ),
+                        TextInputSelectAffix::make('lkrkp')
+                            ->label('Lingkar Kepala')
+                            ->numeric()
+                            ->select(
+                                fn () => Forms\Components\Select::make('sat_lkrkp')
                                     ->options([
                                         'Cm' => 'Cm',
                                     ])
@@ -321,22 +334,20 @@ class FormulirResource extends Resource
                 ])->columns(2),
 
                 Section::make('Upload File')->schema([
-                    SpatieMediaLibraryFileUpload::make('kk')
-                        ->collection('kks')
+                    FileUpload::make('ijazah')
                         ->required()
                         ->openable()
                         ->downloadable(),
-                    SpatieMediaLibraryFileUpload::make('akta')
-                        ->collection('aktas')
+                    FileUpload::make('kk')
                         ->required()
                         ->openable()
                         ->downloadable(),
-                    SpatieMediaLibraryFileUpload::make('ijazah')
-                        ->collection('ijazahs')
+                    FileUpload::make('akte')
                         ->required()
                         ->openable()
-                        ->downloadable(),
-                ])
+                        ->downloadable()
+
+                ])->columns(3),
             ]);
     }
 
@@ -374,8 +385,38 @@ class FormulirResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ExportAction::make(),
+
+                    Tables\Actions\BulkAction::make('insertToSeleksiPd')
+                    ->icon('heroicon-o-circle-stack')
+                        ->label('Seleksi Peserta')
+                        ->color('success')
+                        ->action(function (Tables\Actions\BulkAction $action, array $data) {
+                            $recordIds = $action->getRecords()->pluck('id');
+                            $seleksiId = $data['seleksi_id']; // Menggunakan array $data untuk mendapatkan 'seleksi_id'
+                            $seleksi = Seleksi::find($seleksiId); // Memastikan id seleksi didapatkan dari database
+                            foreach ($recordIds as $recordId) {
+                                $formulir = Formulir::find($recordId);
+                                SeleksiPd::create([
+                                    'seleksi_id' => $seleksi->id, // Menyimpan id yang benar dari objek seleksi
+                                    'periode_id' => $formulir->periode_id,
+                                    'formulir_id' => $formulir->id,
+                                    'hasil' => 'Proses Seleksi', // Default value or based on some logic
+                                ]);
+                            }
+                        })
+                        ->form([
+                            Select::make('seleksi_id')
+                                ->label('Pilih Seleksi ID')
+                                ->options(Seleksi::all()->mapWithKeys(function ($item) {
+                                    return [$item->id => ($item->ta ?? 'Tahun Ajaran Tidak Ditemukan') . ' - ' . ($item->gel ?? 'Gelombang Tidak Ditemukan')];
+                                }))
+                                ->required(),
+                        ]),
+
+
                 ]),
+
+
             ]);
     }
 

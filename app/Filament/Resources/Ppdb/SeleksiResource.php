@@ -7,6 +7,7 @@ use Filament\Tables;
 use App\Models\Periode;
 use App\Models\Seleksi;
 use Filament\Forms\Form;
+use App\Models\SeleksiPd;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Select;
@@ -59,28 +60,40 @@ class SeleksiResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('ta')
-                ->label('Tahun Ajaran')
-                ->searchable(),
+                    ->label('Tahun Ajaran')
+                    ->searchable(),
                 TextColumn::make('gel')
-                ->label('Gelombang')
-                ->searchable(),
+                    ->label('Gelombang')
+                    ->searchable(),
                 TextColumn::make('tgl_sel')
-                ->label('Tanggal Seleksi')
-                ->searchable(),
+                    ->label('Tanggal Seleksi')
+                    ->searchable(),
                 TextColumn::make('ket')
-                ->label('Keterangan')
-                ->searchable(),
+                    ->label('Keterangan')
+                    ->searchable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->label('Ubah Data'),
+
+                Tables\Actions\Action::make('Seleksi')
+                ->icon('heroicon-o-queue-list')
+                ->url(function (Seleksi $record) {
+                    return SeleksiResource::getUrl('seleksi', ['record' => $record->id]);
+                }),
+                
+                
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+                
+
+                
             ]);
     }
 
@@ -97,7 +110,8 @@ class SeleksiResource extends Resource
             'index' => Pages\ListSeleksis::route('/'),
             'create' => Pages\CreateSeleksi::route('/create'),
             'edit' => Pages\EditSeleksi::route('/{record}/edit'),
-            
+            'seleksi' => Pages\SeleksiPeserta::route('/{record}/seleksi-peserta'),
+
         ];
     }
 }

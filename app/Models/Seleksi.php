@@ -16,4 +16,12 @@ class Seleksi extends Model
         'tgl_sel',
         'ket',
     ];
+
+    public function periode(){
+        return $this->belongsTo(Periode::class);
+    }
+
+    public function formulir(){
+        return $this->belongsTo(Formulir::class);
+    }
 }
