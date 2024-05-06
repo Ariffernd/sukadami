@@ -82,7 +82,7 @@ class SeleksiResource extends Resource
                 Tables\Actions\Action::make('Seleksi')
                 ->icon('heroicon-o-queue-list')
                 ->url(function (Seleksi $record) {
-                    return SeleksiResource::getUrl('seleksi', ['record' => $record->id]);
+                    return SeleksiResource::getUrl('seleksi', ['seleksi_id' => $record->id]);
                 }),
                 
                 
@@ -110,7 +110,7 @@ class SeleksiResource extends Resource
             'index' => Pages\ListSeleksis::route('/'),
             'create' => Pages\CreateSeleksi::route('/create'),
             'edit' => Pages\EditSeleksi::route('/{record}/edit'),
-            'seleksi' => Pages\SeleksiPeserta::route('/{record}/seleksi-peserta'),
+            'seleksi' => Pages\SeleksiPeserta::route('/{seleksi_id}/seleksi-peserta'),
 
         ];
     }

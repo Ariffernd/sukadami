@@ -21,6 +21,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Database\Eloquent\Builder;
@@ -157,6 +158,8 @@ class FormulirResource extends Resource
                                         'Cm' => 'Cm',
                                     ])
                             ),
+                        TextInput::make('asal_sklh')
+                            ->label('Asal Sekolah TK/ KB/ PAUD'),
                     ])->columns(2)
                 ])->columns(3),
 
@@ -387,7 +390,7 @@ class FormulirResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
 
                     Tables\Actions\BulkAction::make('insertToSeleksiPd')
-                    ->icon('heroicon-o-circle-stack')
+                        ->icon('heroicon-o-circle-stack')
                         ->label('Seleksi Peserta')
                         ->color('success')
                         ->action(function (Tables\Actions\BulkAction $action, array $data) {
@@ -403,14 +406,20 @@ class FormulirResource extends Resource
                                     'hasil' => 'Proses Seleksi', // Default value or based on some logic
                                 ]);
                             }
+                            Notification::make()
+                                ->success()
+                                ->title('Data berhasil diseleksi')
+                                ->send();
                         })
                         ->form([
                             Select::make('seleksi_id')
+                                ->searchable()
                                 ->label('Pilih Seleksi ID')
                                 ->options(Seleksi::all()->mapWithKeys(function ($item) {
                                     return [$item->id => ($item->ta ?? 'Tahun Ajaran Tidak Ditemukan') . ' - ' . ($item->gel ?? 'Gelombang Tidak Ditemukan')];
                                 }))
                                 ->required(),
+
                         ]),
 
 

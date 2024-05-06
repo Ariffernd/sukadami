@@ -35,6 +35,7 @@ return new class extends Migration
             $table->string('sat_tngi')->nullable();
             $table->integer('lkrkp')->nullable(); //lingkar kepala
             $table->string('sat_lkrkp')->nullable(); //satuan lingkar kepala
+            $table->string('asal_sklh')->nullable();
 
             $table->text('alamat');
             $table->integer('rt');
